@@ -7,7 +7,8 @@ import (
 func main() {
 	var im image_processing.Image
 	im.LoadImage("photo.png")
-	im.SaveGrayscaleToPng("res.png")
+	im2 := im.ResizeImage(460, 309)
+	im2.SaveGrayscaleToPng("res.png")
 }
 
 /*

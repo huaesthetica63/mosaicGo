@@ -20,6 +20,22 @@ type Image struct {
 	height int
 }
 
+func (i *Image) ResizeImage(new_width, new_height int) Image {
+	var res Image
+	res.width = new_width
+	res.height = new_height
+	res.pixels = make([][]ColorPixel, 0, new_height)
+	for y := 0; y < new_height; y++ {
+		row := make([]ColorPixel, 0, new_width)
+		for x := 0; x < new_width; x++ {
+			y_new := int(float32(i.height*y) / float32(new_height))
+			x_new := int(float32(i.width*x) / float32(new_width))
+			row = append(row, i.pixels[y_new][x_new])
+		}
+		res.pixels = append(res.pixels, row)
+	}
+	return res
+}
 func GetColorPixel(col color.Color) ColorPixel {
 	r, g, b, a := col.RGBA()
 	return ColorPixel{
