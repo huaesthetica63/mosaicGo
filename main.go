@@ -8,7 +8,7 @@ func main() {
 	var im image_processing.Image
 	im.LoadImage("photo.png")
 	im2 := im.ResizeImage(460, 309)
-	im2.SaveBinarizeToPng("res.png")
+	im2.SaveMosaicToPng(3, "res.png")
 }
 
 /*

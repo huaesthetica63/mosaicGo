@@ -60,6 +60,20 @@ func (i *Image) Binarize() image.Image {
 	}
 	return res
 }
+func (i *Image) Mosaic(n int) image.Image {
+	diapasone := 255.0 / float32(n)
+	res := image.NewGray(image.Rect(0, 0, i.width, i.height))
+	gray := i.ToGrayscale()
+	for y := 0; y < i.height; y++ {
+		for x := 0; x < i.width; x++ {
+			col := float32(gray.GrayAt(x, y).Y/uint8(diapasone)) * diapasone
+
+			res.SetGray(x, y, color.Gray{Y: uint8(col)})
+
+		}
+	}
+	return res
+}
 func (i *Image) LoadImage(filename string) error {
 	file, err := os.Open(filename)
 	if err != nil {
@@ -116,6 +130,17 @@ func (i *Image) SaveBinarizeToPng(filename string) error {
 	}
 	defer f.Close()
 	if err := png.Encode(f, i.Binarize()); err != nil {
+		return err
+	}
+	return nil
+}
+func (i *Image) SaveMosaicToPng(n int, filename string) error {
+	f, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	if err := png.Encode(f, i.Mosaic(n)); err != nil {
 		return err
 	}
 	return nil
