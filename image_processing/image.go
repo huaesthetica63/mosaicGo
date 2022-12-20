@@ -39,11 +39,26 @@ func (i *Image) ResizeImage(new_width, new_height int) Image {
 func GetColorPixel(col color.Color) ColorPixel {
 	r, g, b, a := col.RGBA()
 	return ColorPixel{
-		R: int(r / 257),
-		G: int(g / 257),
-		B: int(b / 257),
-		A: int(a / 257),
+		R: int(r / 255),
+		G: int(g / 255),
+		B: int(b / 255),
+		A: int(a / 255),
 	}
+}
+func (i *Image) Binarize() image.Image {
+	middle := 255.0 / 2.0
+	res := image.NewGray(image.Rect(0, 0, i.width, i.height))
+	gray := i.ToGrayscale()
+	for y := 0; y < i.height; y++ {
+		for x := 0; x < i.width; x++ {
+			if gray.GrayAt(x, y).Y >= uint8(middle) {
+				res.SetGray(x, y, color.Gray{Y: 255})
+			} else {
+				res.SetGray(x, y, color.Gray{Y: 0})
+			}
+		}
+	}
+	return res
 }
 func (i *Image) LoadImage(filename string) error {
 	file, err := os.Open(filename)
@@ -73,14 +88,14 @@ func RGBtoGray(pix ColorPixel) float32 {
 	x := 0.3*float32(pix.R) + 0.59*float32(pix.G) + 0.11*float32(pix.B)
 	return x
 }
-func (i *Image) ToGrayscale() image.Image {
+func (i *Image) ToGrayscale() image.Gray {
 	res := image.NewGray(image.Rect(0, 0, i.width, i.height))
 	for y := 0; y < i.height; y++ {
 		for x := 0; x < i.width; x++ {
 			res.Set(x, y, color.Gray{Y: uint8(RGBtoGray(i.pixels[y][x]))})
 		}
 	}
-	return res
+	return *res
 }
 func (i *Image) SaveGrayscaleToPng(filename string) error {
 	f, err := os.Create(filename)
@@ -88,7 +103,19 @@ func (i *Image) SaveGrayscaleToPng(filename string) error {
 		return err
 	}
 	defer f.Close()
-	if err := png.Encode(f, i.ToGrayscale()); err != nil {
+	gray := i.ToGrayscale()
+	if err := png.Encode(f, &gray); err != nil {
+		return err
+	}
+	return nil
+}
+func (i *Image) SaveBinarizeToPng(filename string) error {
+	f, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	if err := png.Encode(f, i.Binarize()); err != nil {
 		return err
 	}
 	return nil
