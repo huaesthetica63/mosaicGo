@@ -1,22 +1,10 @@
 package main
 
-import (
-	"log"
-	"main/color_mosaic"
-	"main/image_processing"
-)
+import "main/mosaic_server"
 
 func main() {
-	var im image_processing.Image
-	err := im.LoadImage("photo.png")
-	if err != nil {
-		log.Fatal(err)
-	}
-	cm := color_mosaic.NewPeachMosaic()
-	im2 := cm.MakeMosaic(im)
-	image_processing.SaveToPng(im2, "res.png")
-	//im2 := im.ResizeImage(460, 309)
-	//im2.SaveMosaicToPng(3, "res.png")
+	server := mosaic_server.Server{}
+	server.Load()
 }
 
 /*
