@@ -45,13 +45,13 @@ func GetColorPixel(col color.Color) ColorPixel {
 		A: int(a / 255),
 	}
 }
-func (i *Image) Binarize() image.Image {
-	middle := 255.0 / 2.0
+func (i *Image) Binarize(threshold float32) image.Image {
+	t := 255.0 * threshold
 	res := image.NewGray(image.Rect(0, 0, i.width, i.height))
 	gray := i.ToGrayscale()
 	for y := 0; y < i.height; y++ {
 		for x := 0; x < i.width; x++ {
-			if gray.GrayAt(x, y).Y >= uint8(middle) {
+			if gray.GrayAt(x, y).Y >= uint8(t) {
 				res.SetGray(x, y, color.Gray{Y: 255})
 			} else {
 				res.SetGray(x, y, color.Gray{Y: 0})
@@ -129,13 +129,13 @@ func (i *Image) SaveGrayscaleToPng(filename string) error {
 	}
 	return nil
 }
-func (i *Image) SaveBinarizeToPng(filename string) error {
+func (i *Image) SaveBinarizeToPng(threshold float32, filename string) error {
 	f, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	if err := png.Encode(f, i.Binarize()); err != nil {
+	if err := png.Encode(f, i.Binarize(threshold)); err != nil {
 		return err
 	}
 	return nil
