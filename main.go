@@ -1,14 +1,18 @@
 package main
 
 import (
+	"main/color_mosaic"
 	"main/image_processing"
 )
 
 func main() {
 	var im image_processing.Image
 	im.LoadImage("photo.png")
-	im2 := im.ResizeImage(460, 309)
-	im2.SaveMosaicToPng(3, "res.png")
+	cm := color_mosaic.NewPeachMosaic()
+	im2 := cm.MakeMosaic(im)
+	image_processing.SaveToPng(im2, "res.png")
+	//im2 := im.ResizeImage(460, 309)
+	//im2.SaveMosaicToPng(3, "res.png")
 }
 
 /*

@@ -15,24 +15,24 @@ type ColorPixel struct {
 	A int
 }
 type Image struct {
-	pixels [][]ColorPixel
-	width  int
-	height int
+	Pixels [][]ColorPixel
+	Width  int
+	Height int
 }
 
 func (i *Image) ResizeImage(new_width, new_height int) Image {
 	var res Image
-	res.width = new_width
-	res.height = new_height
-	res.pixels = make([][]ColorPixel, 0, new_height)
+	res.Width = new_width
+	res.Height = new_height
+	res.Pixels = make([][]ColorPixel, 0, new_height)
 	for y := 0; y < new_height; y++ {
 		row := make([]ColorPixel, 0, new_width)
 		for x := 0; x < new_width; x++ {
-			y_new := int(float32(i.height*y) / float32(new_height))
-			x_new := int(float32(i.width*x) / float32(new_width))
-			row = append(row, i.pixels[y_new][x_new])
+			y_new := int(float32(i.Height*y) / float32(new_height))
+			x_new := int(float32(i.Width*x) / float32(new_width))
+			row = append(row, i.Pixels[y_new][x_new])
 		}
-		res.pixels = append(res.pixels, row)
+		res.Pixels = append(res.Pixels, row)
 	}
 	return res
 }
@@ -47,35 +47,15 @@ func GetColorPixel(col color.Color) ColorPixel {
 }
 func (i *Image) Binarize(threshold float32) image.Image {
 	t := 255.0 * threshold
-	res := image.NewGray(image.Rect(0, 0, i.width, i.height))
+	res := image.NewGray(image.Rect(0, 0, i.Width, i.Height))
 	gray := i.ToGrayscale()
-	for y := 0; y < i.height; y++ {
-		for x := 0; x < i.width; x++ {
+	for y := 0; y < i.Height; y++ {
+		for x := 0; x < i.Width; x++ {
 			if gray.GrayAt(x, y).Y >= uint8(t) {
 				res.SetGray(x, y, color.Gray{Y: 255})
 			} else {
 				res.SetGray(x, y, color.Gray{Y: 0})
 			}
-		}
-	}
-	return res
-}
-func (i *Image) Mosaic(n uint8) image.Image {
-	diapasone := 255.0 / float32(n)
-	res := image.NewGray(image.Rect(0, 0, i.width, i.height))
-	gray := i.ToGrayscale()
-	for y := 0; y < i.height; y++ {
-		for x := 0; x < i.width; x++ {
-			num_col := uint8(gray.GrayAt(x, y).Y / uint8(diapasone))
-			var col uint8
-			if num_col == 0 {
-				col = 0
-			} else if num_col == n-1 || num_col == 255 {
-				col = 255
-			} else {
-				col = num_col*uint8(diapasone) + uint8(diapasone)/2
-			}
-			res.SetGray(x, y, color.Gray{Y: col})
 		}
 	}
 	return res
@@ -92,15 +72,15 @@ func (i *Image) LoadImage(filename string) error {
 	}
 	fmt.Println(fileformat)
 	bounds := img.Bounds()
-	i.height = bounds.Max.Y
-	i.width = bounds.Max.X
-	i.pixels = make([][]ColorPixel, 0, i.height)
-	for y := 0; y < i.height; y++ {
-		row := make([]ColorPixel, 0, i.width)
-		for x := 0; x < i.width; x++ {
+	i.Height = bounds.Max.Y
+	i.Width = bounds.Max.X
+	i.Pixels = make([][]ColorPixel, 0, i.Height)
+	for y := 0; y < i.Height; y++ {
+		row := make([]ColorPixel, 0, i.Width)
+		for x := 0; x < i.Width; x++ {
 			row = append(row, GetColorPixel(img.At(x, y)))
 		}
-		i.pixels = append(i.pixels, row)
+		i.Pixels = append(i.Pixels, row)
 	}
 	return nil
 }
@@ -109,10 +89,10 @@ func RGBtoGray(pix ColorPixel) float32 {
 	return x
 }
 func (i *Image) ToGrayscale() image.Gray {
-	res := image.NewGray(image.Rect(0, 0, i.width, i.height))
-	for y := 0; y < i.height; y++ {
-		for x := 0; x < i.width; x++ {
-			res.Set(x, y, color.Gray{Y: uint8(RGBtoGray(i.pixels[y][x]))})
+	res := image.NewGray(image.Rect(0, 0, i.Width, i.Height))
+	for y := 0; y < i.Height; y++ {
+		for x := 0; x < i.Width; x++ {
+			res.Set(x, y, color.Gray{Y: uint8(RGBtoGray(i.Pixels[y][x]))})
 		}
 	}
 	return *res
@@ -140,13 +120,13 @@ func (i *Image) SaveBinarizeToPng(threshold float32, filename string) error {
 	}
 	return nil
 }
-func (i *Image) SaveMosaicToPng(n uint8, filename string) error {
+func SaveToPng(i image.Image, filename string) error {
 	f, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	if err := png.Encode(f, i.Mosaic(n)); err != nil {
+	if err := png.Encode(f, i); err != nil {
 		return err
 	}
 	return nil
