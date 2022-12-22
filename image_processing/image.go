@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"image/jpeg"
 	"image/png"
 	"os"
 )
@@ -61,6 +62,7 @@ func (i *Image) Binarize(threshold float32) image.Image {
 	return res
 }
 func (i *Image) LoadImage(filename string) error {
+	image.RegisterFormat("jpeg", "jpeg", jpeg.Decode, jpeg.DecodeConfig)
 	file, err := os.Open(filename)
 	if err != nil {
 		return err
@@ -105,17 +107,6 @@ func (i *Image) SaveGrayscaleToPng(filename string) error {
 	defer f.Close()
 	gray := i.ToGrayscale()
 	if err := png.Encode(f, &gray); err != nil {
-		return err
-	}
-	return nil
-}
-func (i *Image) SaveBinarizeToPng(threshold float32, filename string) error {
-	f, err := os.Create(filename)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-	if err := png.Encode(f, i.Binarize(threshold)); err != nil {
 		return err
 	}
 	return nil

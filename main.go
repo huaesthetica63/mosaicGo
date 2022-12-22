@@ -1,13 +1,17 @@
 package main
 
 import (
+	"log"
 	"main/color_mosaic"
 	"main/image_processing"
 )
 
 func main() {
 	var im image_processing.Image
-	im.LoadImage("photo.png")
+	err := im.LoadImage("photo.png")
+	if err != nil {
+		log.Fatal(err)
+	}
 	cm := color_mosaic.NewPeachMosaic()
 	im2 := cm.MakeMosaic(im)
 	image_processing.SaveToPng(im2, "res.png")
