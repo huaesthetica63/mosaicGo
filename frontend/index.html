@@ -6,8 +6,18 @@
     </head>
     <body>
         <form enctype="multipart/form-data" method="post" action="/mosaic">
-            <p><input type="file" name="img" accept="image/jpeg,image/png">
-            <input type="submit" value="Make mosaic!"></p>
+            <p><input type="file" name="img" accept="image/jpeg,image/png"></p>
+            <input type="radio" id="grayscale" name="Mosaic" value="grayscale" checked="checked">
+            <label for="grayscale">Grayscale mosaic</label><br>
+            <input type="radio" id="blue" name="Mosaic" value="blue">
+            <label for="blue">Blue mosaic</label><br>
+            <input type="radio" id="peach" name="Mosaic" value="peach">
+            <label for="peach">Peach mosaic</label><br>
+            <input type="radio" id="green" name="Mosaic" value="green">
+            <label for="green">Green mosaic</label><br>
+            <input type="radio" id="red" name="Mosaic" value="red">
+            <label for="red">Red mosaic</label><br>
+            <p><input type="submit" value="Make mosaic!"></p>
         </form>
     </body>
 </html>
