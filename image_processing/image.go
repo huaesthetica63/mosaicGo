@@ -1,7 +1,7 @@
 package image_processing
 
 import (
-	"fmt"
+	"bytes"
 	"image"
 	"image/color"
 	"image/jpeg"
@@ -61,6 +61,24 @@ func (i *Image) Binarize(threshold float32) image.Image {
 	}
 	return res
 }
+func (i *Image) LoadImageBytes(data []byte) error {
+	img, _, err := image.Decode(bytes.NewReader(data))
+	if err != nil {
+		return err
+	}
+	bounds := img.Bounds()
+	i.Height = bounds.Max.Y
+	i.Width = bounds.Max.X
+	i.Pixels = make([][]ColorPixel, 0, i.Height)
+	for y := 0; y < i.Height; y++ {
+		row := make([]ColorPixel, 0, i.Width)
+		for x := 0; x < i.Width; x++ {
+			row = append(row, GetColorPixel(img.At(x, y)))
+		}
+		i.Pixels = append(i.Pixels, row)
+	}
+	return nil
+}
 func (i *Image) LoadImage(filename string) error {
 	image.RegisterFormat("jpeg", "jpeg", jpeg.Decode, jpeg.DecodeConfig)
 	file, err := os.Open(filename)
@@ -68,11 +86,10 @@ func (i *Image) LoadImage(filename string) error {
 		return err
 	}
 	defer file.Close()
-	img, fileformat, err := image.Decode(file)
+	img, _, err := image.Decode(file)
 	if err != nil {
 		return err
 	}
-	fmt.Println(fileformat)
 	bounds := img.Bounds()
 	i.Height = bounds.Max.Y
 	i.Width = bounds.Max.X

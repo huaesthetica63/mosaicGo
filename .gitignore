@@ -1,5 +1,5 @@
 **/.DS_Store
 .DS_Store
-image.png
-photo.png
-res.png
+*.png
+*.jpg
+*.jpeg

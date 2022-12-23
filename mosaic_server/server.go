@@ -2,10 +2,8 @@ package mosaic_server
 
 import (
 	"bytes"
-	"image"
 	"image/png"
 	"io/ioutil"
-	"log"
 	"main/color_mosaic"
 	"main/image_processing"
 	"net/http"
@@ -26,14 +24,9 @@ func (s *Server) Load() {
 		formFile, _ := c.FormFile("img")
 		openedFile, _ := formFile.Open()
 		file, _ := ioutil.ReadAll(openedFile)
-		img, _, err := image.Decode(bytes.NewReader(file))
-		if err != nil {
-			log.Fatalln(err)
-		}
-		image_processing.SaveToPng(img, "image.png")
 		mzk := color_mosaic.NewPeachMosaic()
 		var im image_processing.Image
-		im.LoadImage("image.png")
+		im.LoadImageBytes(file)
 		res := mzk.MakeMosaic(im)
 		buf := new(bytes.Buffer)
 		png.Encode(buf, res)
