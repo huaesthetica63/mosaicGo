@@ -6,11 +6,12 @@ import (
 	"main/image_processing"
 )
 
+//interface for creating different types of mosaics
 type Mosaic interface {
 	MakeMosaic(i image_processing.Image) image.Image
 }
 type GrayscaleMosaic struct {
-	n uint8
+	n uint8 //n different grayscale colors
 }
 
 func NewGrayscaleMosaic(num_col uint8) GrayscaleMosaic {
@@ -24,8 +25,10 @@ func (gr GrayscaleMosaic) MakeMosaic(i image_processing.Image) image.Image {
 		for x := 0; x < i.Width; x++ {
 			num_col := uint8(gray.GrayAt(x, y).Y / uint8(diapasone))
 			var col uint8
+			//first color = 0
 			if num_col == 0 {
 				col = 0
+				//last color = 255
 			} else if num_col == gr.n-1 || num_col == 255 {
 				col = 255
 			} else {
