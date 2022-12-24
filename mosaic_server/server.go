@@ -8,14 +8,18 @@ import (
 	"main/color_mosaic"
 	"main/image_processing"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
+	address string
+	handler *gin.Engine
+	timeout time.Duration
 }
 
-func (s *Server) Load() {
+func getHandler() *gin.Engine {
 	r := gin.Default()
 	r.LoadHTMLGlob("frontend/*.html")
 	r.GET("/", func(c *gin.Context) {
@@ -24,7 +28,8 @@ func (s *Server) Load() {
 	r.POST("/mosaic", func(c *gin.Context) {
 		formFile, err := c.FormFile("img")
 		if err != nil {
-			log.Fatal(err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
 		}
 		var mzk color_mosaic.Mosaic
 		chose := c.Request.Form.Get("Mosaic")
@@ -45,11 +50,13 @@ func (s *Server) Load() {
 		}
 		openedFile, err := formFile.Open()
 		if err != nil {
-			log.Fatal(err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
 		}
 		file, err := ioutil.ReadAll(openedFile)
 		if err != nil {
-			log.Fatal(err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
 		}
 		var im image_processing.Image
 		im.LoadImageBytes(file)
@@ -69,5 +76,23 @@ func (s *Server) Load() {
 		png.Encode(buf, res)
 		c.Writer.Write(buf.Bytes())
 	})
-	r.Run(":8080")
+	return r
+}
+func NewServer(addr string, timeout time.Duration) Server {
+	handler := getHandler()
+	return Server{
+		address: addr,
+		handler: handler,
+		timeout: timeout,
+	}
+}
+func (s *Server) Load() {
+	serv := http.Server{
+		Addr:        s.address,
+		ReadTimeout: s.timeout,
+		Handler:     s.handler,
+	}
+	if err := serv.ListenAndServe(); err != nil {
+		log.Println("Server is running: ", s.address)
+	}
 }
